@@ -1,0 +1,97 @@
+@model IEnumerable<GiyimStokMvc.Models.ProductVariant>
+
+@{
+    ViewData["Title"] = "Kritik Stok Uyarısı";
+}
+
+<div class="container-fluid mt-3">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold text-danger mb-1">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>Kritik Stok Uyarısı
+            </h3>
+            <p class="text-muted small mb-0">Depoda belirlenen kritik seviyenin altına düşmüş ürünlerin listesi.</p>
+        </div>
+        <a asp-action="UrunEkle" class="btn btn-success fw-bold">
+            <i class="bi bi-plus-lg me-1"></i> Stok Takviyesi Yap
+        </a>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <!-- KRİTİK ÜRÜN YOKSA BAŞARI UYARISI -->
+        <div class="card border-0 shadow-sm p-5 text-center bg-white">
+            <div class="mb-3">
+                <i class="bi bi-check-circle-fill text-success" style="font-size: 4rem;"></i>
+            </div>
+            <h4 class="fw-bold text-dark">Harika! Kritik Seviyede Ürün Yok</h4>
+            <p class="text-muted">Depodaki tüm ürünlerin stok miktarları güvenli seviyenin üzerindedir.</p>
+            <div class="mt-2">
+                <a asp-action="DepoListesi" class="btn btn-outline-primary fw-bold">Depo Kataloğuna Git</a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- ÖZET UYARI KARTI -->
+        <div class="alert alert-danger d-flex align-items-center border-0 shadow-sm mb-4" role="alert">
+            <i class="bi bi-bell-fill fs-4 me-3"></i>
+            <div>
+                <strong>Dikkat!</strong> Toplam <strong>@Model.Count()</strong> adet ürün varyantının stoğu kritik eşiğin altındadır. Acil tedarik planlanmalıdır.
+            </div>
+        </div>
+
+        <!-- ÜRÜN TABLOSU & HIZLI STOK ARTTIRMA -->
+        <div class="card border-0 shadow-sm bg-white p-3">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th style="width: 8%;">Görsel</th>
+                            <th style="width: 25%;">Ürün Adı</th>
+                            <th style="width: 15%;">Model Kodu</th>
+                            <th style="width: 15%;">Varyant (Renk / Beden)</th>
+                            <th style="width: 12%;">Barkod</th>
+                            <th class="text-center" style="width: 10%;">Kritik Eşik</th>
+                            <th class="text-center" style="width: 10%;">Mevcut Stok</th>
+                            <th class="text-end" style="width: 5%;">İşlem</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            string resim = string.IsNullOrWhiteSpace(item.ImageUrl) ? "https://via.placeholder.com/100?text=Yok" : item.ImageUrl;
+                            
+                            <tr class="table-danger border-bottom">
+                                <td>
+                                    <img src="@resim" class="rounded" style="width: 45px; height: 45px; object-fit: cover;" alt="@item.Product?.Name">
+                                </td>
+                                <td>
+                                    <span class="fw-bold text-dark d-block">@item.Product?.Name</span>
+                                    <small class="text-muted">@item.Product?.Category</small>
+                                </td>
+                                <td class="font-monospace small">@item.Product?.ModelCode</td>
+                                <td>
+                                    <span class="badge bg-light text-dark border me-1">@item.Color</span>
+                                    <span class="badge bg-light text-dark border">@item.Size</span>
+                                </td>
+                                <td class="font-monospace small">@item.Barcode</td>
+                                <td class="text-center fw-bold text-muted">@item.CriticalStockLevel Adet</td>
+                                <td class="text-center">
+                                    <span class="badge bg-danger fs-6 px-3 py-2">
+                                        @item.StockQuantity Adet
+                                    </span>
+                                </td>
+                                <td class="text-end">
+                                    <a asp-action="UrunEkle" asp-route-barcode="@item.Barcode" class="btn btn-sm btn-outline-dark fw-bold" title="Stok Ekle">
+                                        <i class="bi bi-box-arrow-in-down me-1"></i> Ekle
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>

@@ -1,0 +1,96 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Tekstil Stok & Kasa</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            overflow-x: hidden;
+            background-color: #f8f9fa;
+        }
+        .sidebar {
+            min-height: 100vh;
+            width: 250px;
+            background-color: #212529;
+            color: #fff;
+        }
+        .sidebar .nav-link {
+            color: #adb5bd;
+            font-size: 1.05rem;
+            padding: 12px 20px;
+            border-radius: 6px;
+            margin-bottom: 4px;
+        }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            color: #fff;
+            background-color: #0d6efd;
+        }
+        .sidebar .nav-link i {
+            margin-right: 10px;
+        }
+        .main-content {
+            padding: 25px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- SOL SIDEBAR MENÜ -->
+            <div class="col-md-3 col-lg-2 px-0 sidebar d-flex flex-column p-3">
+                <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none px-2">
+                    <i class="bi bi-shop fs-3 me-2 text-primary"></i>
+                    <span class="fs-5 fw-bold">Giyim Stok v1.0</span>
+                </a>
+                
+                <hr class="text-secondary">
+                
+                <ul class="nav nav-pills flex-column mb-auto">
+                    <li class="nav-item">
+                        <a href="/Stok/DepoListesi" class="nav-link">
+                            <i class="bi bi-box-seam"></i> Depo Stok Listesi
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/Stok/Index" class="nav-link">
+                            <i class="bi bi-cart-check"></i> Hızlı Kasa / Satış
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/Stok/UrunEkle" class="nav-link">
+                            <i class="bi bi-plus-square"></i> Ürün & Barkod Ekle
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/Stok/KritikStoklar" class="nav-link text-warning">
+                            <i class="bi bi-exclamation-triangle"></i> Kritik Stoklar
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" asp-controller="Stok" asp-action="LogListesi">
+                            <i class="bi bi-journal-text me-2"></i> İşlem & Personel Logları
+                        </a>
+                    </li>
+                </ul>
+                <hr class="text-secondary">
+                <div class="px-2 text-muted small">
+                    Tekstil Mağaza Otomasyonu
+                </div>
+            </div>
+
+            <!-- SAĞ İÇERİK ALANI -->
+            <div class="col-md-9 col-lg-10 main-content">
+                @RenderBody()
+            </div>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

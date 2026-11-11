@@ -1,0 +1,490 @@
+@model IEnumerable<GiyimStokMvc.Models.ProductVariant>
+
+@{
+    ViewData["Title"] = "Hızlı Kasa & POS Ekranı";
+    var kategoriler = Model.Select(x => string.IsNullOrWhiteSpace(x.Product?.Category) ? "Diğer" : x.Product.Category).Distinct().ToList();
+}
+
+<div class="container-fluid mt-2">
+    <!-- ANA GRID CONTAINER (YAN YANA DÜZEN) -->
+    <div class="row g-3">
+        
+        <!-- SOL KOLON: Personel Kodu + Barkod Girişi + Dokunmatik Ürün Seçimi (Genişlik: 7/12) -->
+        <div class="col-lg-7 col-xl-7">
+            <!-- Üst Bilgi ve Input Kartı -->
+            <div class="card p-3 shadow-sm mb-3 border-0 bg-white">
+                <div class="row g-2 align-items-center">
+                    <!-- PERSONEL KODU / PIN -->
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold small mb-1">🔑 Personel Kodu / PIN:</label>
+                        <input type="password" id="userCodeInput" class="form-control border-primary fw-bold" placeholder="PIN (Örn: 101)" autocomplete="off" />
+                    </div>
+
+                    <!-- BARKOD GİRİŞİ -->
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold small mb-1">Barkod Okutun:</label>
+                        <input type="text" id="barcodeInput" class="form-control border-primary fw-bold" placeholder="Barkod okutunuz..." autofocus autocomplete="off" />
+                    </div>
+
+                    <!-- EKLE BUTONU -->
+                    <div class="col-md-2">
+                        <label class="form-label d-none d-md-block mb-1">&nbsp;</label>
+                        <button class="btn btn-primary w-100 fw-bold" id="btnEkle" onclick="barkodIleEkle()">Ekle</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kategori Sekmeleri ve Ürün Kartları -->
+            <div class="card p-3 shadow-sm border-0 bg-white">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <h6 class="fw-bold m-0"><i class="bi bi-grid-fill text-primary me-1"></i> Kategoriden Seçim</h6>
+                </div>
+
+                <!-- Sekmeler -->
+                <ul class="nav nav-pills mb-3 gap-1" id="kategoriTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active fw-bold btn-sm" data-bs-toggle="pill" data-bs-target="#cat-all" type="button">Tümü</button>
+                    </li>
+                    @foreach (var kat in kategoriler)
+                    {
+                        var tabId = "cat-" + kat.Replace(" ", "").Replace("ı", "i").Replace("ş", "s").Replace("ğ", "g").Replace("Ü", "U").Replace("ü", "u").Replace("Ö", "O").Replace("ö", "o").Replace("Ç", "C").Replace("ç", "c");
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link fw-bold btn-sm" data-bs-toggle="pill" data-bs-target="#@tabId" type="button">@kat</button>
+                        </li>
+                    }
+                </ul>
+
+                <!-- Kartlar (İç Taşmayı Engellemek İçin Özel Yükseklik) -->
+                <div class="tab-content" id="kategoriTabContent" style="max-height: 480px; overflow-y: auto; overflow-x: hidden;">
+                    <!-- TÜMÜ SEKMESİ -->
+                    <div class="tab-pane fade show active" id="cat-all" role="tabpanel">
+                        <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 g-2">
+                            @foreach (var item in Model)
+                            {
+                                string resim = string.IsNullOrWhiteSpace(item.ImageUrl) ? "https://via.placeholder.com/150?text=Resim+Yok" : item.ImageUrl;
+                                <div class="col">
+                                    <button type="button" class="btn btn-outline-secondary w-100 h-100 text-start p-2 shadow-sm pos-card" onclick="sepeteEkle('@item.Barcode', '@item.Product?.Name', '@item.Color / @item.Size', @item.SalePrice.ToString(System.Globalization.CultureInfo.InvariantCulture), @item.StockQuantity)">
+                                        <img src="@resim" class="rounded mb-1 w-100" style="height: 75px; object-fit: cover;">
+                                        <div class="fw-bold text-truncate small text-dark">@item.Product?.Name</div>
+                                        <div class="text-muted small" style="font-size: 0.75rem;">@item.Color / @item.Size</div>
+                                        <div class="text-success fw-bold small">@item.SalePrice.ToString("C2")</div>
+                                    </button>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- KATEGORİ SEKMELERİ -->
+                    @foreach (var kat in kategoriler)
+                    {
+                        var tabId = "cat-" + kat.Replace(" ", "").Replace("ı", "i").Replace("ş", "s").Replace("ğ", "g").Replace("Ü", "U").Replace("ü", "u").Replace("Ö", "O").Replace("ö", "o").Replace("Ç", "C").Replace("ç", "c");
+                        var katUrunleri = Model.Where(x => (string.IsNullOrWhiteSpace(x.Product?.Category) ? "Diğer" : x.Product.Category) == kat);
+
+                        <div class="tab-pane fade" id="@tabId" role="tabpanel">
+                            <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 g-2">
+                                @foreach (var item in katUrunleri)
+                                {
+                                    string resim = string.IsNullOrWhiteSpace(item.ImageUrl) ? "https://via.placeholder.com/150?text=Resim+Yok" : item.ImageUrl;
+                                    <div class="col">
+                                        <button type="button" class="btn btn-outline-secondary w-100 h-100 text-start p-2 shadow-sm pos-card" onclick="sepeteEkle('@item.Barcode', '@item.Product?.Name', '@item.Color / @item.Size', @item.SalePrice.ToString(System.Globalization.CultureInfo.InvariantCulture), @item.StockQuantity)">
+                                            <img src="@resim" class="rounded mb-1 w-100" style="height: 75px; object-fit: cover;">
+                                            <div class="fw-bold text-truncate small text-dark">@item.Product?.Name</div>
+                                            <div class="text-muted small" style="font-size: 0.75rem;">@item.Color / @item.Size</div>
+                                            <div class="text-success fw-bold small">@item.SalePrice.ToString("C2")</div>
+                                        </button>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- SAĞ KOLON: MÜŞTERİ FİŞİ / SEPET (Genişlik: 5/12) -->
+        <div class="col-lg-5 col-xl-5">
+            <div class="card p-3 shadow-sm border-0 bg-white d-flex flex-column" style="min-height: 600px;">
+                <h5 class="fw-bold mb-3 border-bottom pb-2">
+                    <i class="bi bi-receipt text-primary me-2"></i>Müşteri Fişi / Sepet
+                </h5>
+
+                <!-- Fiş Listesi Tablosu -->
+                <div class="table-responsive flex-grow-1" style="max-height: 380px; overflow-y: auto;">
+                    <table class="table table-hover table-sm align-middle mb-0" id="sepetTablosu">
+                        <thead class="table-dark">
+                            <tr>
+                                <th style="width: 40%;">Ürün</th>
+                                <th class="text-center" style="width: 15%;">Adet</th>
+                                <th class="text-end" style="width: 20%;">Fiyat</th>
+                                <th class="text-end" style="width: 20%;">Toplam</th>
+                                <th class="text-center" style="width: 5%;">Sil</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sepetBody">
+                            <!-- JS ile Dinamik Dolacak -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- TOPLAM TUTAR EKRANI -->
+                <div class="bg-dark text-white p-3 rounded mb-3 text-end mt-3">
+                    <small class="text-uppercase text-muted d-block fw-bold" style="letter-spacing: 1px;">Ödenecek Toplam Tutar</small>
+                    <span id="toplamTutar" class="fs-1 fw-bold text-warning">0,00 ₺</span>
+                </div>
+
+                <!-- AKSİYON BUTONLARI -->
+                                <!-- AKSİYON BUTONLARI -->
+                <div class="row g-2">
+                    <div class="col-12 mb-1">
+                        <button class="btn btn-outline-danger w-100 py-2 fw-bold btn-sm" onclick="sepetiIptalEt()">
+                            <i class="bi bi-x-circle me-1"></i> Fiş İptal (Temizle)
+                        </button>
+                    </div>
+                    <div class="col-4">
+                        <button class="btn btn-success w-100 py-3 fw-bold" onclick="satisiTamamla(1)">
+                            <i class="bi bi-cash-stack fs-5 d-block mb-1"></i> Nakit
+                        </button>
+                    </div>
+                    <div class="col-4">
+                        <button class="btn btn-primary w-100 py-3 fw-bold" onclick="satisiTamamla(2)">
+                            <i class="bi bi-credit-card fs-5 d-block mb-1"></i> K. Kartı
+                        </button>
+                    </div>
+                    <div class="col-4">
+                        <button class="btn btn-warning w-100 py-3 fw-bold text-dark" onclick="parcaliOdemeAc()">
+                            <i class="bi bi-pie-chart-fill fs-5 d-block mb-1"></i> Parçalı
+                        </button>
+                    </div>
+                </div>
+
+                <!-- PARÇALI ÖDEME MODALI (POPUP) -->
+                <div class="modal fade" id="parcaliModal" tabindex="-1">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header bg-warning text-dark">
+                                <h5 class="modal-header-title fw-bold m-0"><i class="bi bi-pie-chart-fill me-2"></i>Parçalı Ödeme</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="alert alert-secondary text-center mb-3">
+                                    <small class="d-block text-muted text-uppercase">Toplam Tutar</small>
+                                    <span id="parcaliToplamTutarLabel" class="fs-3 fw-bold text-dark">0,00 ₺</span>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">💵 Nakit Ödenen Tutar (₺):</label>
+                                    <input type="number" step="0.01" id="parcaliNakitInput" class="form-control form-control-lg fw-bold text-success" placeholder="0.00" oninput="parcaliHesapla('nakit')">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">💳 Kredi Kartı Ödenen Tutar (₺):</label>
+                                    <input type="number" step="0.01" id="parcaliKartInput" class="form-control form-control-lg fw-bold text-primary" placeholder="0.00" oninput="parcaliHesapla('kart')">
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                                <button type="button" class="btn btn-warning fw-bold text-dark" onclick="parcaliSatisiBitir()">Ödemeyi Onayla & Satışı Bitir</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                                <!-- MÜŞTERİ SATIŞ FİŞİ MODALI -->
+                <div class="modal fade" id="fisModal" tabindex="-1">
+                    <div class="modal-dialog modal-dialog-centered modal-sm">
+                        <div class="modal-content">
+                            <div class="modal-header bg-dark text-white p-2">
+                                <h6 class="modal-title fw-bold m-0"><i class="bi bi-receipt me-1"></i> Satış Fişi Önizleme</h6>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                            </div>
+                            
+                            <!-- TERMAL FİŞ ALANI (YAZDIRILABİLİR KISIM) -->
+                            <div class="modal-body p-3 font-monospace" id="printableFis" style="font-size: 0.85rem; background: #fff8e7;">
+                                <div class="text-center mb-2 border-bottom pb-2">
+                                    <h6 class="fw-bold mb-0">GİYİM MAĞAZASI POS</h6>
+                                    <small class="text-muted d-block">Tarih: <span id="fisTarih"></span></small>
+                                    <small class="text-muted d-block">Kasiyer: <span id="fisKasiyer"></span></small>
+                                </div>
+
+                                <!-- Ürünler Tablosu -->
+                                <table class="w-100 mb-2" style="font-size: 0.8rem;">
+                                    <thead>
+                                        <tr class="border-bottom">
+                                            <th class="text-start">Ürün</th>
+                                            <th class="text-center">Adet</th>
+                                            <th class="text-end">Tutar</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="fisUrunBody">
+                                        <!-- JS ile dolacak -->
+                                    </tbody>
+                                </table>
+
+                                <div class="border-top pt-2 mt-2">
+                                    <div class="d-flex justify-content-between fw-bold fs-6">
+                                        <span>TOPLAM:</span>
+                                        <span id="fisToplamTutar">0,00 ₺</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between text-muted small mt-1">
+                                        <span>Ödeme Yöntemi:</span>
+                                        <span id="fisOdemeYontemi" class="fw-bold"></span>
+                                    </div>
+                                </div>
+
+                                <div class="text-center mt-3 pt-2 border-top text-muted" style="font-size: 0.7rem;">
+                                    <p class="m-0">Bizi tercih ettiğiniz için teşekkür ederiz!</p>
+                                    <p class="m-0">Değişim 14 gün içinde fiş ile yapılır.</p>
+                                </div>
+                            </div>
+
+                            <div class="modal-footer p-2 d-flex justify-content-between">
+                                <button type="button" class="btn btn-secondary btn-sm" onclick="kasaTemizleVeKapat()">Kapat</button>
+                                <button type="button" class="btn btn-primary btn-sm fw-bold" onclick="fisYazdir()">
+                                    <i class="bi bi-printer me-1"></i> Fişi Yazdır
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let sepet = [];
+
+        const barcodeInput = document.getElementById('barcodeInput');
+        const userCodeInput = document.getElementById('userCodeInput');
+        const sepetBody = document.getElementById('sepetBody');
+        const toplamTutarLabel = document.getElementById('toplamTutar');
+
+        window.onload = () => barcodeInput.focus();
+
+        // BARKOD SORGULAMA & EKLEME
+        function barkodIleEkle() {
+            const barcode = barcodeInput.value.trim();
+            if (!barcode) return;
+
+            fetch('/Stok/UrunGetir?barcode=' + encodeURIComponent(barcode))
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        sepeteEkle(data.barcode, data.name, data.variant, data.price, data.stock);
+                        barcodeInput.value = '';
+                        barcodeInput.focus();
+                    } else {
+                        alert("❌ " + data.message);
+                        barcodeInput.select();
+                    }
+                });
+        }
+
+        barcodeInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                barkodIleEkle();
+            }
+        });
+
+        // SEPETE EKLEME / ARTTIRMA
+        function sepeteEkle(barcode, name, variant, price, maxStock) {
+            let mevcut = sepet.find(x => x.barcode === barcode);
+            let numPrice = typeof price === 'number' ? price : parseFloat(price.toString().replace(',', '.'));
+
+            if (mevcut) {
+                if (mevcut.adet + 1 > maxStock) {
+                    alert("Yetersiz stok! Depoda sadece " + maxStock + " adet var.");
+                    return;
+                }
+                mevcut.adet += 1;
+            } else {
+                sepet.push({
+                    barcode: barcode,
+                    name: name,
+                    variant: variant,
+                    price: numPrice,
+                    adet: 1,
+                    maxStock: maxStock
+                });
+            }
+            sepetiCiz();
+        }
+
+        function satirmSil(barcode) {
+            sepet = sepet.filter(x => x.barcode !== barcode);
+            sepetiCiz();
+        }
+
+        function sepetiIptalEt() {
+            if (sepet.length === 0) return;
+            if (confirm("Mevcut fiş tamamen iptal edilsin mi?")) {
+                sepet = [];
+                sepetiCiz();
+                barcodeInput.focus();
+            }
+        }
+
+        let genelToplamTutar = 0;
+
+        function sepetiCiz() {
+            sepetBody.innerHTML = '';
+            genelToplamTutar = 0;
+
+            sepet.forEach(item => {
+                let araToplam = item.price * item.adet;
+                genelToplamTutar += araToplam;
+
+                let row = `
+                    <tr>
+                        <td>
+                            <div class="fw-bold text-truncate" style="max-width: 140px;">${item.name}</div>
+                            <small class="text-muted">${item.variant}</small>
+                        </td>
+                        <td class="text-center fw-bold fs-6 align-middle">${item.adet}</td>
+                        <td class="text-end align-middle">${item.price.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺</td>
+                        <td class="text-end fw-bold text-success align-middle">${araToplam.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺</td>
+                        <td class="text-center align-middle">
+                            <button class="btn btn-sm btn-outline-danger px-2 py-0" onclick="satirmSil('${item.barcode}')">✕</button>
+                        </td>
+                    </tr>
+                `;
+                sepetBody.insertAdjacentHTML('beforeend', row);
+            });
+
+            toplamTutarLabel.innerText = genelToplamTutar.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₺';
+        }
+
+       let sonSatisSepeti = [];
+
+        function satisiTamamla(odemeTipi, nakitTutar = 0, kartTutar = 0) {
+            if (sepet.length === 0) {
+                alert("Sepette ürün yok!");
+                return;
+            }
+
+            const userCode = userCodeInput.value.trim();
+            if (!userCode) {
+                alert("Lütfen Personel Kodunuzu / PIN giriniz!");
+                userCodeInput.focus();
+                return;
+            }
+
+            let finalNakit = odemeTipi === 1 ? genelToplamTutar : (odemeTipi === 3 ? nakitTutar : 0);
+            let finalKart = odemeTipi === 2 ? genelToplamTutar : (odemeTipi === 3 ? kartTutar : 0);
+
+            fetch('/Stok/SepetOnayla', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    sepet: sepet,
+                    userCode: userCode,
+                    odemeTipi: odemeTipi,
+                    nakitTutar: finalNakit,
+                    kartTutar: finalKart
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    // Satış sepettini fiş için sakla
+                    sonSatisSepeti = [...sepet];
+                    fisOlustur(odemeTipi, finalNakit, finalKart, userCode);
+                } else {
+                    alert("❌ " + data.message);
+                }
+            });
+        }
+
+        // FİŞ MODALINI DOLDURUP AÇMA
+        function fisOlustur(odemeTipi, nakit, kart, userCode) {
+            document.getElementById('fisTarih').innerText = new Date().toLocaleString('tr-TR');
+            document.getElementById('fisKasiyer').innerText = userCode;
+
+            const fisBody = document.getElementById('fisUrunBody');
+            fisBody.innerHTML = '';
+
+            let toplam = 0;
+            sonSatisSepeti.forEach(item => {
+                let araToplam = item.price * item.adet;
+                toplam += araToplam;
+                let row = `
+                    <tr>
+                        <td class="text-start">${item.name} (${item.variant})</td>
+                        <td class="text-center">${item.adet}</td>
+                        <td class="text-end">${araToplam.toFixed(2)} ₺</td>
+                    </tr>
+                `;
+                fisBody.insertAdjacentHTML('beforeend', row);
+            });
+
+            document.getElementById('fisToplamTutar').innerText = toplam.toLocaleString('tr-TR', { minimumFractionDigits: 2 }) + ' ₺';
+
+            let yontemMetni = '';
+            if (odemeTipi === 1) yontemMetni = 'Nakit';
+            else if (odemeTipi === 2) yontemMetni = 'Kredi Kartı';
+            else yontemMetni = `Parçalı (Nakit: ${nakit.toFixed(2)} ₺ / Kart: ${kart.toFixed(2)} ₺)`;
+
+            document.getElementById('fisOdemeYontemi').innerText = yontemMetni;
+
+            let fisModal = new bootstrap.Modal(document.getElementById('fisModal'));
+            fisModal.show();
+        }
+
+        // FİŞİ YAZDIRMA
+        function fisYazdir() {
+            let printContents = document.getElementById('printableFis').innerHTML;
+            let originalContents = document.body.innerHTML;
+
+            document.body.innerHTML = `<div style="width: 300px; margin: auto;">${printContents}</div>`;
+            window.print();
+            document.body.innerHTML = originalContents;
+            location.reload();
+        }
+
+        function kasaTemizleVeKapat() {
+            sepet = [];
+            sepetiCiz();
+            location.reload();
+        }
+
+        // PARÇALI ÖDEME MODAL KONTROLLERİ
+        let parcaliModal;
+
+        function parcaliOdemeAc() {
+            if (sepet.length === 0) {
+                alert("Sepette ürün yok!");
+                return;
+            }
+            document.getElementById('parcaliToplamTutarLabel').innerText = genelToplamTutar.toLocaleString('tr-TR', { minimumFractionDigits: 2 }) + ' ₺';
+            document.getElementById('parcaliNakitInput').value = (genelToplamTutar / 2).toFixed(2);
+            document.getElementById('parcaliKartInput').value = (genelToplamTutar / 2).toFixed(2);
+
+            parcaliModal = new bootstrap.Modal(document.getElementById('parcaliModal'));
+            parcaliModal.show();
+        }
+
+        function parcaliHesapla(degisen) {
+            let nakit = parseFloat(document.getElementById('parcaliNakitInput').value) || 0;
+            let kart = parseFloat(document.getElementById('parcaliKartInput').value) || 0;
+
+            if (degisen === 'nakit') {
+                document.getElementById('parcaliKartInput').value = Math.max(0, genelToplamTutar - nakit).toFixed(2);
+            } else {
+                document.getElementById('parcaliNakitInput').value = Math.max(0, genelToplamTutar - kart).toFixed(2);
+            }
+        }
+
+        function parcaliSatisiBitir() {
+            let nakit = parseFloat(document.getElementById('parcaliNakitInput').value) || 0;
+            let kart = parseFloat(document.getElementById('parcaliKartInput').value) || 0;
+
+            if (Math.abs((nakit + kart) - genelToplamTutar) > 0.01) {
+                alert("Girilen Nakit ve Kart tutarlarının toplamı genel toplama eşit olmalıdır!");
+                return;
+            }
+
+            if (parcaliModal) parcaliModal.hide();
+            satisiTamamla(3, nakit, kart);
+        }
+    </script>
+}

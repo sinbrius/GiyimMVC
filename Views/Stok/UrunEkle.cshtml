@@ -1,0 +1,111 @@
+@{
+    ViewData["Title"] = "Yeni Ürün & Görsel Yükle";
+}
+
+<div class="container mt-4" style="max-width: 850px;">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>🛍️ Depoya Yeni Ürün & Görsel Yükle</h2>
+        <a href="/Stok/DepoListesi" class="btn btn-outline-secondary">← Depo Kataloğuna Dön</a>
+    </div>
+    <hr />
+
+    @if (ViewBag.Error != null)
+    {
+        <div class="alert alert-danger fw-bold">❌ @ViewBag.Error</div>
+    }
+
+    <div class="card p-4 shadow-sm">
+        <!-- enctype="multipart/form-data" DOSYA YÜKLEME İÇİN ŞARTTIR -->
+        <form action="/Stok/UrunEkle" method="post" enctype="multipart/form-data">
+            <div class="row">
+                <!-- SOL TARAF: Form Alanları -->
+                <div class="col-md-7">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Barkod Okutun / Girin *</label>
+                        <input type="text" name="barcode" id="barcode" class="form-control form-control-lg border-primary" placeholder="Barkodu okutunuz..." required autofocus autocomplete="off" />
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-7 mb-3">
+                            <label class="form-label fw-bold">Ürün Adı *</label>
+                            <input type="text" name="name" class="form-control" placeholder="Örn: Bisiklet Yaka Basic Tişört" required />
+                        </div>
+                        <div class="col-md-5 mb-3">
+                            <label class="form-label fw-bold">Model Kodu</label>
+                            <input type="text" name="modelCode" class="form-control" placeholder="Örn: TS-2026-BLK" />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Renk</label>
+                            <input type="text" name="color" class="form-control" placeholder="Örn: Siyah" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Beden</label>
+                            <input type="text" name="size" class="form-control" placeholder="Örn: M, L, XL, 38..." />
+                        </div>
+                    </div>
+
+                    <!-- BİLGİSAYARDAN DOSYA SEÇME ALANI -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Bilgisayardan Ürün Görseli Seç</label>
+                        <input type="file" name="imageFile" id="imageFileInput" class="form-control" accept="image/*" />
+                        <small class="text-muted">JPG, PNG veya WEBP formatında resim yükleyebilirsiniz.</small>
+                    </div>
+                </div>
+
+                <!-- SAĞ TARAF: Canlı Görsel Önizleme ve Fiyat/Stok -->
+                <div class="col-md-5 d-flex flex-column justify-content-between border-start ps-4">
+                    <div>
+                        <label class="form-label fw-bold mb-2">Seçilen Resim Önizlemesi</label>
+                        <div class="card overflow-hidden shadow-sm text-center bg-light mb-3" style="height: 230px;">
+                            <img id="imgPreview" src="https://via.placeholder.com/300x400/f8f9fa/6c757d?text=Resim+Seçilmedi" class="img-fluid h-100" style="object-fit: cover;" alt="Önizleme" />
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="row">
+                            <div class="col-6 mb-2">
+                                <label class="form-label fw-bold">Stok Adedi</label>
+                                <input type="number" name="stockQuantity" class="form-control" value="10" min="0" required />
+                            </div>
+                            <div class="col-6 mb-2">
+                                <label class="form-label fw-bold">Kritik Stok</label>
+                                <input type="number" name="criticalStockLevel" class="form-control" value="3" min="1" required />
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Satış Fiyatı (₺)</label>
+                            <input type="number" step="0.01" name="salePrice" class="form-control form-control-lg text-success fw-bold" placeholder="0.00" required />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <hr />
+            <button type="submit" class="btn btn-success btn-lg w-100 fw-bold">💾 Resmi Yükle ve Kaydet</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Bilgisayardan dosya seçildiğinde resmi anında ekranda önizle
+        const imageFileInput = document.getElementById('imageFileInput');
+        const imgPreview = document.getElementById('imgPreview');
+
+        imageFileInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imgPreview.src = e.target.result;
+                }
+                reader.readAsDataURL(file);
+            } else {
+                imgPreview.src = "https://via.placeholder.com/300x400/f8f9fa/6c757d?text=Resim+Seçilmedi";
+            }
+        });
+    </script>
+}
