@@ -226,3 +226,4 @@ C:\Users\Feyzanur\OneDrive\Desktop\proje\GiyimStokMvc\obj\Debug\net9.0\refint\Gi
 C:\Users\Feyzanur\OneDrive\Desktop\proje\GiyimStokMvc\obj\Debug\net9.0\GiyimStokMvc.pdb
 C:\Users\Feyzanur\OneDrive\Desktop\proje\GiyimStokMvc\obj\Debug\net9.0\GiyimStokMvc.genruntimeconfig.cache
 C:\Users\Feyzanur\OneDrive\Desktop\proje\GiyimStokMvc\obj\Debug\net9.0\ref\GiyimStokMvc.dll
+C:\Users\Feyzanur\OneDrive\Desktop\proje\GiyimStokMvc\obj\Debug\net9.0\GiyimStokMvc.sourcelink.json

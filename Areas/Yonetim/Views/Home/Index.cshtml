@@ -1,0 +1,90 @@
+@model IEnumerable<GiyimStokMvc.Models.AppUser>
+@{
+    ViewData["Title"] = "Yönetici Paneli";
+}
+
+<div class="container-fluid mt-3">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h3 class="fw-bold mb-1"><i class="bi bi-person-plus text-primary me-2"></i>Yönetici Paneli</h3>
+            <p class="text-muted small mb-0">Personel ekleme ve yönetme işlemleri.</p>
+        </div>
+    </div>
+    <div class="row g-4 align-items-start">
+        <div class="col-md-7">
+            <div class="card border-0 shadow-sm bg-white">
+                <h6 class="card-header fw-bold bg-secondary text-white">👥 Personel Listesi</h6>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th style="width: 30%;">Personel Adı</th>
+                                <th style="width: 30%;">Username</th>
+                                <th style="width: 20%;">Code</th>
+                                <th style="width: 20%;">Departman</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var user in Model)
+                            {
+                                <tr>
+                                    <td>@user.FullName</td>
+                                    <td>@user.Username</td>
+                                    <td>@user.UserCode</td>
+                                    <td>@user.Role</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    
+        <div class="col-md-5">
+            <div class="card p-4 shadow-sm">
+                <form action="/Yonetim/Home/PersonelEkle" method="post" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Yeni Personel Adı</label>
+                        <input type="text" name="fullName" class="form-control" placeholder="Örn: Ahmet Yılmaz" required />
+                    </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Username</label>
+                    <input type="text" name="username" class="form-control" placeholder="Örn: ahmetyilmaz" required />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Code</label>
+                    <div class="input-group">
+                        <input type="text" id="userCodeInput" name="userCode" class="form-control" placeholder="Örn: 1234" required />
+                        <button type="button" class="btn btn-outline-secondary" id="generateCodeBtn" onclick="generateRandomCode()">
+                            <i class="bi bi-shuffle me-1"></i> Kod Üret
+                        </button>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Departman</label>
+                    <select name="department" class="form-select" required>
+                        <option value="">Departman Seçin</option>
+                        <option value="Kasiyer">Kasiyer</option>
+                        <option value="Depo">Depo</option>
+                        <option value="Yönetici">Yönetici</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary w-100 fw-bold">Personel Ekle</button>
+            </form>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script>
+        function generateRandomCode() {
+            const harfler = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            let rastgeleHarfler="";
+            for (let i = 0; i < 3; i++) {
+                const rastgeleIndex = Math.floor(Math.random() * harfler.length);
+                rastgeleHarfler += harfler[rastgeleIndex];
+            }
+            const randomCode = Math.floor(1000 + Math.random() * 9000); // 4 haneli rastgele sayı üretir
+            document.getElementById('userCodeInput').value = rastgeleHarfler + randomCode;
+        }
+    </script>
+}

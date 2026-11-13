@@ -30,6 +30,39 @@ namespace GiyimStokMvc.Services
                 .OrderBy(v => v.Product!.Name)
                 .ToListAsync();
         }
+        public async Task<List<AppUser>> GetPersonelListesiAsync()
+        {
+            return await _context.Users
+                .OrderBy(u => u.FullName)
+                .ToListAsync();
+        }
+        public async Task<(bool Success, string Message)> PersonelEkleAsync(string fullName, string userCode, string department, string username)
+{
+    if (string.IsNullOrWhiteSpace(fullName) || string.IsNullOrWhiteSpace(userCode) || string.IsNullOrWhiteSpace(department))
+    {
+        return (false, "Lütfen tüm alanları doldurun!");
+    }
+
+    // Aynı kodla başka personel var mı kontrolü
+    bool kodVarMi = await _context.Users.AnyAsync(u => u.UserCode == userCode.Trim());
+    if (kodVarMi)
+    {
+        return (false, "Bu Personel Kodu (PIN) zaten kullanımda! Lütfen yeni kod üretin.");
+    }
+
+    var yeniPersonel = new AppUser
+    {
+        FullName = fullName.Trim(),
+        UserCode = userCode.Trim().ToUpper(),
+        Role = department,
+        Username = string.IsNullOrWhiteSpace(username) ? userCode.Trim().ToLower() : username.Trim()
+    };
+
+    _context.Users.Add(yeniPersonel);
+    await _context.SaveChangesAsync();
+
+    return (true, "Yeni personel başarıyla eklendi!");
+}
         public async Task<List<ProductVariant>> GetKritikStokListesiAsync()
         {
             return await _context.ProductVariants

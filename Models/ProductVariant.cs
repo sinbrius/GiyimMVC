@@ -16,5 +16,6 @@ public class ProductVariant
 
     public decimal PurchasePrice { get; set; }
     public string? ImageUrl { get; set; }
+    public decimal DiscountRate { get; set; } = 0; // Yüzdelik indirim oranı (Örn: 20 = %20 indirim)
     public ICollection<StockTransaction> StockTransactions { get; set; }
 }

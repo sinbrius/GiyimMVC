@@ -70,5 +70,6 @@ namespace GiyimStokMvc.Controllers
             var kritikUrunler = await _stokService.GetKritikStokListesiAsync();
             return View(kritikUrunler);
         }
+        
     }
 }

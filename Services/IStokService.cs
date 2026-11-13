@@ -5,6 +5,8 @@ namespace GiyimStokMvc.Services
     public interface IStokService
     {
         Task<List<ProductVariant>> GetDepoListesiAsync();
+        Task<List<AppUser>> GetPersonelListesiAsync();
+        Task<(bool Success, string Message)> PersonelEkleAsync(string fullName, string userCode, string department, string Username);
         Task<List<StockTransaction>> GetLogListesiAsync();
         Task<List<ProductVariant>> GetKasaUrunListesiAsync();
         Task<List<ProductVariant>> GetKritikStokListesiAsync();

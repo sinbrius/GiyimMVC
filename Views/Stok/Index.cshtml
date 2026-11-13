@@ -135,9 +135,14 @@
                 <!-- AKSİYON BUTONLARI -->
                                 <!-- AKSİYON BUTONLARI -->
                 <div class="row g-2">
-                    <div class="col-12 mb-1">
+                    <div class="col-6 mb-1">
                         <button class="btn btn-outline-danger w-100 py-2 fw-bold btn-sm" onclick="sepetiIptalEt()">
                             <i class="bi bi-x-circle me-1"></i> Fiş İptal (Temizle)
+                        </button>
+                    </div>
+                    <div class="col-6 mb-1">
+                        <button class="btn btn-outline-danger w-100 py-2 fw-bold btn-sm" onclick="indirimUygula()">
+                            <i class="bi bi-arrow-down-left-circle me-1"></i> İndirim Uygula
                         </button>
                     </div>
                     <div class="col-4">
@@ -154,6 +159,10 @@
                         <button class="btn btn-warning w-100 py-3 fw-bold text-dark" onclick="parcaliOdemeAc()">
                             <i class="bi bi-pie-chart-fill fs-5 d-block mb-1"></i> Parçalı
                         </button>
+                    </div>
+                    <div class="col-12 mt-2">
+                        <button class="btn btn-secondary w-100 py-2 fw-bold btn-sm" onclick="iadeAc()">
+                            <i class="bi bi-arrow-counterclockwise me-1"></i> İade İşlemleri
                     </div>
                 </div>
 
@@ -182,6 +191,19 @@
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
                                 <button type="button" class="btn btn-warning fw-bold text-dark" onclick="parcaliSatisiBitir()">Ödemeyi Onayla & Satışı Bitir</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                                <!-- İADE MODALI (POPUP) -->
+                <div class="modal fade" id="iadeModal" tabindex="-1">
+                    <div class="modal-dialog modal-dialog-centered"> 
+                        <div class="modal-content">
+                            <!-- İndirim Alanı Örneği (Kasa veya Ürün Ekranı İçin) -->
+                            <div class="input-group input-group-sm mt-2">
+                                <span class="input-group-text fw-bold">İndirim (%)</span>
+                                <input type="number" id="indirimOrani" class="form-control" placeholder="Örn: 15" min="0" max="100" oninput="indirimHesapla()">
+                                <span class="input-group-text bg-success text-white fw-bold" id="indirimliFiyatEtiketi">0,00 ₺</span>
                             </div>
                         </div>
                     </div>
@@ -485,6 +507,23 @@
 
             if (parcaliModal) parcaliModal.hide();
             satisiTamamla(3, nakit, kart);
+        }
+                function indirimHesapla() {
+            // Mevcut toplam tutarı veya ürün fiyatını aldığın element (kendi ID'ne göre güncelle)
+            const hamFiyat = parseFloat(document.getElementById("hamToplamFiyat").innerText.replace(',', '.')) || 0;
+            const oran = parseFloat(document.getElementById("indirimOrani").value) || 0;
+
+            if (oran < 0 || oran > 100) {
+                alert("İndirim oranı 0 ile 100 arasında olmalıdır!");
+                document.getElementById("indirimOrani").value = 0;
+                return;
+            }
+
+            const indirimTutari = hamFiyat * (oran / 100);
+            const yeniFiyat = hamFiyat - indirimTutari;
+
+            // Ekranda yeni fiyatı anlık göster
+            document.getElementById("indirimliFiyatEtiketi").innerText = yeniFiyat.toFixed(2) + " ₺";
         }
     </script>
 }

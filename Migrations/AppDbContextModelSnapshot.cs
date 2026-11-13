@@ -142,6 +142,9 @@ namespace GiyimStokMvc.Migrations
                     b.Property<int>("CriticalStockLevel")
                         .HasColumnType("int");
 
+                    b.Property<decimal>("DiscountRate")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<string>("ImageUrl")
                         .HasColumnType("nvarchar(max)");
 
@@ -177,6 +180,7 @@ namespace GiyimStokMvc.Migrations
                             Barcode = "8690000000011",
                             Color = "Siyah",
                             CriticalStockLevel = 3,
+                            DiscountRate = 0m,
                             ImageUrl = "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=500&q=80",
                             ProductId = 1,
                             PurchasePrice = 120.00m,
@@ -190,6 +194,7 @@ namespace GiyimStokMvc.Migrations
                             Barcode = "8690000000028",
                             Color = "Beyaz",
                             CriticalStockLevel = 3,
+                            DiscountRate = 0m,
                             ImageUrl = "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=500&q=80",
                             ProductId = 1,
                             PurchasePrice = 120.00m,
@@ -203,6 +208,7 @@ namespace GiyimStokMvc.Migrations
                             Barcode = "8690000000035",
                             Color = "Mavi Denim",
                             CriticalStockLevel = 3,
+                            DiscountRate = 0m,
                             ImageUrl = "https://images.unsplash.com/photo-1576995853123-5a10305d93c0?w=500&q=80",
                             ProductId = 2,
                             PurchasePrice = 350.00m,
@@ -216,6 +222,7 @@ namespace GiyimStokMvc.Migrations
                             Barcode = "8690000000042",
                             Color = "Gri Melanj",
                             CriticalStockLevel = 3,
+                            DiscountRate = 0m,
                             ImageUrl = "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=500&q=80",
                             ProductId = 3,
                             PurchasePrice = 220.00m,
@@ -229,6 +236,7 @@ namespace GiyimStokMvc.Migrations
                             Barcode = "8690000000059",
                             Color = "Kırmızı Çiçekli",
                             CriticalStockLevel = 4,
+                            DiscountRate = 0m,
                             ImageUrl = "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=500&q=80",
                             ProductId = 4,
                             PurchasePrice = 450.00m,

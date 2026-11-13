@@ -22,7 +22,7 @@
                 <div class="col-md-7">
                     <div class="mb-3">
                         <label class="form-label fw-bold">Barkod Okutun / Girin *</label>
-                        <input type="text" name="barcode" id="barcode" class="form-control form-control-lg border-primary" placeholder="Barkodu okutunuz..." required autofocus autocomplete="off" />
+                        <input type="text" name="barcode" onchange="doldur()" id="barcode" class="form-control form-control-lg border-primary" placeholder="Barkodu okutunuz..." required autofocus autocomplete="off" />
                     </div>
 
                     <div class="row">
@@ -107,5 +107,41 @@
                 imgPreview.src = "https://via.placeholder.com/300x400/f8f9fa/6c757d?text=Resim+Seçilmedi";
             }
         });
+        document.getElementById('barcode').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault(); // Formun submit olmasını engelle
+                doldur(); // doldur fonksiyonunu çağır
+            }
+        });
+        function doldur(){
+            const barcode = document.getElementById('barcode').value.trim();
+            if(!barcode) return; // Eğer barkod boşsa işlemi durdur
+            fetch(`/Stok/UrunGetir?barcode=${encodeURIComponent(barcode)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if(data.success){
+                        console.log("Gelen veri:", data); // Gelen veriyi konsola yazdır
+                        const urun = data.urun || data.product || data.data || data;
+                        document.querySelector('input[name="name"]').value = urun.name || '';
+                        document.querySelector('input[name="modelCode"]').value = urun.modelCode || '';
+                        document.querySelector('input[name="color"]').value = urun.color || '';
+                        document.querySelector('input[name="size"]').value = urun.size || '';
+                        document.querySelector('input[name="salePrice"]').value = urun.salePrice || '';
+                        document.querySelector('input[name="stockQuantity"]').value = urun.stockQuantity || 10;
+                        document.querySelector('input[name="criticalStockLevel"]').value = urun.criticalStockLevel || 3;
+                        if(urun.imageUrl){
+                            imgPreview.src = urun.imageUrl;
+                        } else {
+                            imgPreview.src = "https://via.placeholder.com/300x400/f8f9fa/6c757d?text=Resim+Seçilmedi";
+                        }
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Hata:', error);
+                    alert('Ürün bilgileri alınırken bir hata oluştu.');
+                });
+        }
     </script>
 }
