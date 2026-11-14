@@ -161,8 +161,9 @@
                         </button>
                     </div>
                     <div class="col-12 mt-2">
-                        <button class="btn btn-secondary w-100 py-2 fw-bold btn-sm" onclick="iadeAc()">
+                        <button class="btn btn-secondary w-100 py-2 fw-bold btn-sm" onclick="iadeOlustur()">
                             <i class="bi bi-arrow-counterclockwise me-1"></i> İade İşlemleri
+                        </button>
                     </div>
                 </div>
 
@@ -508,7 +509,7 @@
             if (parcaliModal) parcaliModal.hide();
             satisiTamamla(3, nakit, kart);
         }
-                function indirimHesapla() {
+        function indirimHesapla() {
             // Mevcut toplam tutarı veya ürün fiyatını aldığın element (kendi ID'ne göre güncelle)
             const hamFiyat = parseFloat(document.getElementById("hamToplamFiyat").innerText.replace(',', '.')) || 0;
             const oran = parseFloat(document.getElementById("indirimOrani").value) || 0;
@@ -525,5 +526,42 @@
             // Ekranda yeni fiyatı anlık göster
             document.getElementById("indirimliFiyatEtiketi").innerText = yeniFiyat.toFixed(2) + " ₺";
         }
+        async function iadeOlustur() {
+            if (sepet.length === 0) {
+                alert("Sepette ürün yok!");
+                return;
+            }
+
+            if (!confirm("Sepetteki ürünleri iade olarak işlemek istediğinize emin misiniz?")) return;
+
+            const userCode = userCodeInput.value.trim();
+            if (!userCode) {
+                alert("Lütfen Personel Kodunuzu / PIN giriniz!");
+                userCodeInput.focus();
+                return;
+            }
+
+            const payload = {
+                sepet: sepet,
+                userCode: userCode,
+                odemeTipi: 1, // Enum: Nakit
+                nakitTutar: genelToplamTutar,
+                kartTutar: 0,
+                isReturn: true
+            };
+
+            const response = await fetch("/Stok/SepetOnayla", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+                if (response.ok) {
+                    alert("İade işlemi başarıyla tamamlandı, stoklar güncellendi.");
+                    sepet = [];
+                    kasaTemizleVeKapat(); // Senin ekranı yenileyen fonksiyon adın neyse o
+                } else {
+                    alert("İade sırasında bir hata oluştu!");
+                }
+            }
     </script>
 }

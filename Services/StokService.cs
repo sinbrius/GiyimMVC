@@ -169,7 +169,7 @@ namespace GiyimStokMvc.Services
             };
         }
 
-        public async Task<(bool Success, string Message)> SepetOnaylaAsync(SepetOnayDto dto)
+public async Task<(bool Success, string Message)> SepetOnaylaAsync(SepetOnayDto dto)
 {
     if (dto == null || dto.Sepet == null || !dto.Sepet.Any()) 
         return (false, "Sepet boş!");
@@ -188,22 +188,30 @@ namespace GiyimStokMvc.Services
         var variant = await _context.ProductVariants.FirstOrDefaultAsync(v => v.Barcode == item.Barcode);
         if (variant != null)
         {
-            if (variant.StockQuantity < item.Adet)
+            if (dto.IsReturn)
             {
-                return (false, $"'{variant.Barcode}' barkodlu ürün için yeterli stok yok!");
+                // İADE İŞLEMİ: Stok geri eklenir
+                variant.StockQuantity += item.Adet;
             }
-
-            variant.StockQuantity -= item.Adet;
+            else
+            {
+                // SATIŞ İŞLEMİ: Stok kontrol edilir ve düşülür
+                if (variant.StockQuantity < item.Adet)
+                {
+                    return (false, $"'{variant.Barcode}' barkodlu ürün için yeterli stok yok!");
+                }
+                variant.StockQuantity -= item.Adet;
+            }
 
             _context.StockTransactions.Add(new StockTransaction
             {
                 ProductVariantId = variant.Id,
                 Quantity = item.Adet,
-                Type = IslemTuru.Satis,
+                Type = dto.IsReturn ? IslemTuru.Iade : IslemTuru.Satis,
                 TransactionDate = DateTime.Now,
                 UserId = user.Id,
 
-                // Ödeme detayları kaydediliyor
+                // Ödeme detayları kaydediliyor (Sepet indirimi sonrası net tutarlar gelir)
                 OdemeTipi = dto.OdemeTipi,
                 NakitTutar = dto.NakitTutar,
                 KartTutar = dto.KartTutar
@@ -212,7 +220,9 @@ namespace GiyimStokMvc.Services
     }
 
     await _context.SaveChangesAsync();
-    return (true, $"Satış başarıyla tamamlandı! İşlemi Yapan: {user.FullName}");
+
+    string islemMetni = dto.IsReturn ? "İade" : "Satış";
+    return (true, $"{islemMetni} başarıyla tamamlandı! İşlemi Yapan: {user.FullName}");
 }
 
         private async Task<string?> SaveImageFileAsync(IFormFile? imageFile)

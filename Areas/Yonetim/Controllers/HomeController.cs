@@ -59,5 +59,7 @@ namespace GiyimStokMvc.Areas.Yonetim.Controllers
             var stokLoglari = await _yonetimService.GetStokLogListesiAsync();
             return View(stokLoglari);
         }
+    
+        
     }
 }

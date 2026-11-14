@@ -24,6 +24,8 @@ namespace GiyimStokMvc.Services
         public OdemeTipi OdemeTipi { get; set; } = OdemeTipi.Nakit;
         public decimal NakitTutar { get; set; }
         public decimal KartTutar { get; set; }
+        public bool IsReturn { get; set; } = false;      // İade mi satış mı?
+        public decimal IndirimTutari { get; set; } = 0;
     }
 
     public class SepetItemDto
